@@ -1,0 +1,46 @@
+
+    RewriteEngine On
+
+    #Https redirection
+    ## RewriteEngine On
+    ## RewriteCond %{HTTPS} != On
+    ## RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L, R=301]
+    # Deny access to storage, app, routes, config
+    RewriteRule ^(storage|app|routes|config|database|resources|bootstrap)/ - [F,L]
+    
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    # Block unwanted HTTP methods like TRACE and TRACK
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|PUT|DELETE|OPTIONS|CONNECT)
+    RewriteRule .* - [F]
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    <Files .env>
+    Order allow,deny
+    Deny from all
+    </Files>
+
+    # <Directory /path-to-your-project/art/storage>
+    # Order Deny,Allow
+    # Deny from all
+    # </Directory>
+
+
+    <FilesMatch "^\.env(\.example)?$">
+    Order allow,deny
+    Deny from all
+    </FilesMatch>
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+# ------------------------------------------
+# Hide Apache server signature from auto error pages
+# ------------------------------------------
+ServerSignature Off
+

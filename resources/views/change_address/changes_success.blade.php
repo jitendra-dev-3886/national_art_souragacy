@@ -1,0 +1,61 @@
+@extends('layouts.clinic.clinic_master')
+@section('content')
+
+<style nonce="{{$cspNonce}}">
+    .csp-clinic-alert-primary {
+        background-color: #0b5ed7c7;
+        border-color: #0b5ed7;
+        color: white;
+    }
+
+    .csp-clinic-alert-primary h4 {
+        color: white;
+    }
+
+    .csp-clinic-btn-view {
+        background-color: #0b49f9;
+        border-color: #0b5ed7;
+        color: white;
+    }
+</style>
+
+
+<div class="container mt-5">
+    <div class="alert alert-primary csp-clinic-alert-primary">
+        @if(Session()->has('success'))
+            <h4>{{ session('success') }}</h4>
+        @endif
+
+        <p><strong>Application Number:</strong> {{ $appNo }}</p>
+
+      
+       <a href="{{ route('change_address.application.view', ['encryptedId' => Crypt::encryptString($application->id)]) }}">
+    <i class="fas fa-eye"></i> View Application
+</a>
+
+    </div>
+</div>
+
+{{-- 
+
+<div class="container mt-5">
+   <div class="alert alert-primary csp-clinic-alert-primary">
+        {{-- <h4 style="color: white;">ART Clinic Application Submitted Successfully!</h4> --}}
+        {{-- @if(Session()->has('success'))
+         <h4>{{ session('success') }}</h4>
+        @endif --}}
+        {{-- @foreach($applications as $application) --}}
+        {{-- <p><strong>Application Number:</strong> {{ $appNo }}</p> --}}
+
+        {{-- <p>{{ $success }}</p> --}}
+        {{-- <a href="{{ route("renewal.sc_renewalform_view", $app_sclinic_id) }}" class="btn btn csp-clinic-btn-view">
+            <i class="fas fa-eye"></i> View Application Form
+        </a>  --}}
+        {{-- @endforeach --}}
+    {{-- </div>    --}}
+{{-- </div> --}} 
+@endsection
+
+
+
+

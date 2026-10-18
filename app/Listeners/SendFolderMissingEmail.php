@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Listeners;
+
+use App\Events\FolderMissingEvent;
+use App\Mail\FolderMissingAlert;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
+class SendFolderMissingEmail
+{
+    /**
+     * Handle the event.
+     *
+     * @param  \App\Events\FolderMissingEvent  $event
+     * @return void
+     */
+   public function handle(FolderMissingEvent $event)
+    {
+        Log::info('📬 Listener: SendFolderMissingEmail triggered.');
+
+        $message = $event->message;
+
+        Mail::to('nishuanand577@gmail.com')
+            ->send(new FolderMissingAlert($message));
+
+        Log::info('✅ Email sent regarding missing folders: ' . $message);
+    }
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

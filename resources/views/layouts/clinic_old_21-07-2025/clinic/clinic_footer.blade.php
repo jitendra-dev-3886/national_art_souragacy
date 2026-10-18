@@ -1,0 +1,2 @@
+<style nonce="{{$cspNonce}}">
+  </style>  

@@ -1,0 +1,202 @@
+<?php
+// function test(){
+//     echo "Hello";
+
+// }
+
+
+use Illuminate\Support\Facades\DB;
+
+
+function action_code($action_code){
+    $action_code = DB::table('service_meta_work_flow_table')
+                   ->where('action_code', $action_code)
+                   ->value('flow_status');
+
+    return $action_code ? $action_code : 'Not available';
+}
+
+if (!function_exists('getActor')) {
+    function getActor($appId) {
+        // Define default values
+        $levelId = 2;
+        $serviceId = 1;
+    
+        // Assuming nextActor is a function that returns some actors based on levelId, appId, and serviceId
+        $getData = nextActor($levelId, $appId, $serviceId);
+    
+        // Check if getData is an array
+        if (is_array($getData) && count($getData) > 0) {
+            // Implode the array into a comma-separated string
+            $userIds = implode(',', $getData);
+        } else {
+            // If nextActor does not return an array or it's empty, return an empty array or handle accordingly
+            return [];
+        }
+    
+        // Fetch user data from the database using `whereIn` method
+        try {
+            //$userData = DB::table('user_table')->whereIn('user_id', explode(',', $userIds))->get();
+            $userData = DB::table('user_table')
+                ->whereIn('userid', explode(',', $userIds))
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            // Handle potential database connection issues or query errors
+            return ['error' => 'Failed to fetch user data: ' . $e->getMessage()];
+        }
+    
+        // Generate the options HTML dynamically
+         $html = ''; // Placeholder for dropdown
+        foreach ($userData as $value) {
+            // Assuming 'user_id' is the unique identifier for each user, and 'username' is the user name
+            $html .= '<option value="' . $appId . '-' . $levelId . '-' . $value->userid . '-' . $serviceId . '">' . htmlspecialchars($value->username) . '</option>';
+        }
+    
+        // Return the generated HTML options
+        return $html;
+    }
+}
+    
+
+function nextActor($levelId, $appId, $serviceId) {
+    // Default response for no record or action_code match
+    $noRecord = "No records found.";
+    $noActionCode = "No action code found.";
+
+    // Fetch the action_code for the specific level
+    $actionCode = DB::table('service_meta_work_flow_table')
+                    ->where('level_id', $levelId)
+                    ->value('action_code');
+
+    if (!$actionCode) {
+        return $noRecord;
+    }
+
+    // Handle each level_id
+    switch ($levelId) {
+        case 1:
+            if ($actionCode == 1001) {
+                // Get user_id from approve_authority_table
+                $userId = DB::table('approve_authority_table as at')
+                            ->join('user_roles_access_table as ut', 'at.user_id', '=', 'ut.user_id')
+                            ->where('ut.role_id', 4)
+                            ->where('at.service_id', 1)
+                            ->where('at.is_active', 2)
+                            ->value('at.user_id');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 2:
+            if ($actionCode == 1002) {
+                $service_id = 1;
+                $role_id = 5;
+                //Get user_ids from service_examination_table for examiners
+                $user_ids = DB::table('approve_authority_table AS at')
+                    ->join('user_roles_access_table AS ut', 'at.user_id', '=', 'ut.user_id')
+                    ->where('ut.role_id', $role_id)
+                    ->where('at.service_id', $service_id)
+                    ->where('at.is_active', 2)
+                    ->pluck('at.user_id');
+
+            // Check if there are any user IDs
+            if ($user_ids->isNotEmpty()) {
+                return $user_ids->toArray(); // Return the user IDs as an array
+            } else {
+                return 'no_record'; // Return a no record message if no IDs found
+            }
+        }
+
+        case 3:
+            if ($actionCode == 1003) {
+                // Get user_id from approve_authority_table assuming single authority
+                $userId = DB::table('approve_authority_table as at')
+                            ->join('user_roles_access_table as ut', 'at.user_id', '=', 'ut.user_id')
+                            ->where('ut.role_id', 4)
+                            ->where('at.service_id', $serviceId)
+                            ->where('at.is_active', 2)
+                            ->value('at.user_id');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 4:
+            if ($actionCode == 1004) {
+                // Get user_id from noc_form table
+                $userId = DB::table('noc_form')
+                            ->where('id', $appId)
+                            ->value('noc_userid');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 5:
+            if ($actionCode == 1005) {
+                // Get user_id from approve_authority_table assuming single authority
+                $userId = DB::table('approve_authority_table as at')
+                            ->join('user_roles_access_table as ut', 'at.user_id', '=', 'ut.user_id')
+                            ->where('ut.role_id', 4)
+                            ->where('at.service_id', $serviceId)
+                            ->where('at.is_active', 2)
+                            ->value('at.user_id');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 6:
+            if ($actionCode == 1006) {
+                // Get user_id from work_flow_table based on application_id and level_id
+                $userId = DB::table('work_flow_table')
+                            ->where('service_id', $serviceId)
+                            ->where('application_id', $appId)
+                            ->where('level_id', 2)
+                            ->value('user_id');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 7:
+            if ($actionCode == 1007) {
+                // Get user_id from approve_authority_table assuming single authority
+                $userId = DB::table('approve_authority_table as at')
+                            ->join('user_roles_access_table as ut', 'at.user_id', '=', 'ut.user_id')
+                            ->where('ut.role_id', 4)
+                            ->where('at.service_id', $serviceId)
+                            ->where('at.is_active', 2)
+                            ->value('at.user_id');
+
+                return $userId ? $userId : $noRecord;
+            } else {
+                return $noActionCode;
+            }
+
+        case 8:
+        case 9:
+        case 10:
+            if (in_array($actionCode, [1008, 1009, 1010])) {
+                return 'NULL'; // No user_id for these levels (internal committee, external committee, apex committee)
+            } else {
+                return $noActionCode;
+            }
+
+        default:
+            return "Invalid level_id";
+    }
+
+
+    
+}
+
+
+
